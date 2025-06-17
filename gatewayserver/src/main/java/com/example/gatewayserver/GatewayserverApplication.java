@@ -6,29 +6,32 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 
+import java.time.LocalDateTime;
+
 @SpringBootApplication
 public class GatewayserverApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(GatewayserverApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(GatewayserverApplication.class, args);
+    }
 
 
-	//bean che serve per configurare una route alternativa da fornire nell url del gateway
+    //bean che serve per configurare una route alternativa da fornire nell url del gateway
 // rispetto a quella generata di default dal gateway
-	// in questo caso sto fornendo un url alternativo :
-	// http://localhost:8072/pincopallo/accounts/*
-	// invece del default http://localhost:8072/accounts/*
-	@Bean
-	public RouteLocator customRouteConfig(RouteLocatorBuilder routeLocatorBuilder){
-		return routeLocatorBuilder.routes().route(p -> p.path("/pincopallo/accounts/**")
-				.filters(filter ->
-						filter.rewritePath(
-								"/pincopallo/accounts/(?<segment>.*)" ,
-								"/${segment}")
-				)
-				.uri("lb://ACCOUNTS"))
-				.build();
-	}
+    // in questo caso sto fornendo un url alternativo :
+    // http://localhost:8072/pincopallo/accounts/*
+    // invece del default http://localhost:8072/accounts/*
+    @Bean
+    public RouteLocator customRouteConfig(RouteLocatorBuilder routeLocatorBuilder) {
+        return routeLocatorBuilder.routes().route(p -> p.path("/pincopallo/accounts/**")
+                        .filters(filter ->
+                                filter
+                                        .rewritePath("/pincopallo/accounts/(?<segment>.*)", "/${segment}")
+                                        .addResponseHeader("X-Response_Time", LocalDateTime.now().toString())
+
+                        )
+                        .uri("lb://ACCOUNTS"))
+                .build();
+    }
 
 }
